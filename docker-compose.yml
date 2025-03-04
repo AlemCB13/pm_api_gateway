@@ -2,10 +2,12 @@ version: "3.8"
 
 services:
   pm_api_gateway:
-    build: ./pm_api_gateway
+    build: .
     ports:
       - "8080:8080"
     depends_on:
       - pm_auth
       - pm_user_management
       - pm_project_management
+    networks:
+      - app-network
