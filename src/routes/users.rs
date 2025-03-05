@@ -1,15 +1,17 @@
-use actix_web::{web, HttpResponse};
+use actix_web::{web, HttpResponse, Responder};
 use reqwest::Client;
+use serde_json::Value;
 
-pub async fn get_user(user_id: web::Path<i32>) -> HttpResponse {
-    // Hacer una solicitud al microservicio de gestión de usuarios (pm_user_management)
+pub async fn get_user(user_id: web::Path<i32>) -> impl Responder {
     let client = Client::new();
-    let response = client.get(format!("http://pm_user_management:8081/api/users/{}", user_id))
+    let response = client
+        .get(format!("http://pm_user_management:8081/api/users/{}", user_id))
         .send()
         .await
         .unwrap();
 
-    HttpResponse::Ok().json(response.json().await.unwrap())
+    let data: Value = response.json().await.unwrap();
+    HttpResponse::Ok().json(data)
 }
 
 pub fn config(cfg: &mut web::ServiceConfig) {

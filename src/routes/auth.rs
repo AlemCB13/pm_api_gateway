@@ -1,15 +1,18 @@
-use actix_web::{web, HttpResponse};
+use actix_web::{web, HttpResponse, Responder};
 use reqwest::Client;
+use serde_json::Value;
 
-pub async fn login() -> HttpResponse {
-    // Hacer una solicitud al microservicio de autenticación (pm_auth)
+pub async fn login() -> impl Responder {
+    // Crear cliente HTTP
     let client = Client::new();
-    let response = client.post("http://pm_auth:8080/api/auth/login")
+    let response = client
+        .post("http://pm_auth:8080/api/auth/login")
         .send()
         .await
-        .unwrap();
+        .unwrap(); 
 
-    HttpResponse::Ok().json(response.json().await.unwrap())
+    let data: Value = response.json().await.unwrap(); // Convertir response a JSON
+    HttpResponse::Ok().json(data)
 }
 
 pub fn config(cfg: &mut web::ServiceConfig) {

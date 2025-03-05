@@ -1,23 +1,46 @@
-# Usar una imagen base de Rust
-FROM rust:1.60 as builder
-
-# Establecer el directorio de trabajo
+# Etapa 1: Construcción
+FROM rust:latest AS builder
 WORKDIR /app
-
-# Copiar los archivos del proyecto
-COPY . .
-
-# Construir el proyecto
+COPY Cargo.toml Cargo.lock ./
+RUN cargo fetch               
+COPY src/ /app/src/                
 RUN cargo build --release
 
-# Usar una imagen ligera para la ejecución
-FROM debian:buster-slim
+# Etapa 2: Ejecución
+FROM ubuntu:22.04
+WORKDIR /app
 
-# Copiar el binario construido
+# Instalar dependencias necesarias
+RUN apt-get update && apt-get install -y \
+    libssl-dev \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY --from=builder /app/target/release/pm_api_gateway /usr/local/bin/pm_api_gateway
 
-# Exponer el puerto 8080
+# Exponer el puerto
 EXPOSE 8080
 
-# Comando para ejecutar el API Gateway
-CMD ["pm_api_gateway"]
+# Comando de inicio
+CMD ["/usr/local/bin/pm_api_gateway"]
+
+
+
+
+
+# # Etapa 1: Construcción
+# FROM rust:latest as builder
+# WORKDIR /app
+# COPY . .
+# RUN cargo build --release
+
+# # Etapa 2: Ejecución
+# FROM debian:buster-slim
+# WORKDIR /app
+# COPY --from=builder /app/target/release/pm_api_gateway /usr/local/bin/pm_api_gateway
+
+# # Exponer el puerto del servicio
+# EXPOSE 8080
+
+# # Comando de inicio
+# CMD ["pm_api_gateway"]
