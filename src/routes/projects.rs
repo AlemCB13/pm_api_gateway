@@ -5,7 +5,7 @@ use serde_json::Value;
 // Crear un proyecto
 pub async fn create_project() -> HttpResponse {
     let client = Client::new();
-    let response = client.post("http://pm_project_management:8083/api/projects")
+    let response = client.post("http://pm_project_management:8083/projects")
         .send()
         .await
         .unwrap();
@@ -17,7 +17,7 @@ pub async fn create_project() -> HttpResponse {
 // Obtener un proyecto por ID
 pub async fn get_project(project_id: web::Path<i32>) -> HttpResponse {
     let client = Client::new();
-    let response = client.get(format!("http://pm_project_management:8083/api/projects/{}", project_id))
+    let response = client.get(format!("http://pm_project_management:8083/projects/{}", project_id))
         .send()
         .await
         .unwrap();
@@ -29,7 +29,7 @@ pub async fn get_project(project_id: web::Path<i32>) -> HttpResponse {
 // Actualizar un proyecto
 pub async fn update_project(project_id: web::Path<i32>) -> HttpResponse {
     let client = Client::new();
-    let response = client.put(format!("http://pm_project_management:8083/api/projects/{}", project_id))
+    let response = client.put(format!("http://pm_project_management:8083/projects/{}", project_id))
         .send()
         .await
         .unwrap();
@@ -41,7 +41,7 @@ pub async fn update_project(project_id: web::Path<i32>) -> HttpResponse {
 // Eliminar un proyecto
 pub async fn delete_project(project_id: web::Path<i32>) -> HttpResponse {
     let client = Client::new();
-    let response = client.delete(format!("http://pm_project_management:8083/api/projects/{}", project_id))
+    let response = client.delete(format!("http://pm_project_management:8083/projects/{}", project_id))
         .send()
         .await
         .unwrap();

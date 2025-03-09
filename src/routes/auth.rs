@@ -5,7 +5,7 @@ use serde_json::Value;
 // Login
 pub async fn login() -> HttpResponse {
     let client = Client::new();
-    let response = client.post("http://pm_auth:8081/api/login")
+    let response = client.post("http://pm_auth:8081/login")
         .send()
         .await
         .unwrap();
@@ -17,7 +17,7 @@ pub async fn login() -> HttpResponse {
 // Registro
 pub async fn register() -> HttpResponse {
     let client = Client::new();
-    let response = client.post("http://pm_auth:8081/api/register")
+    let response = client.post("http://pm_auth:8081/register")
         .send()
         .await
         .unwrap();
@@ -29,7 +29,7 @@ pub async fn register() -> HttpResponse {
 // Logout
 pub async fn logout() -> HttpResponse {
     let client = Client::new();
-    let response = client.post("http://pm_auth:8081/api/logout")
+    let response = client.post("http://pm_auth:8081/logout")
         .send()
         .await
         .unwrap();
@@ -41,7 +41,7 @@ pub async fn logout() -> HttpResponse {
 // Autenticación de dos factores (2FA)
 pub async fn two_factor_auth() -> HttpResponse {
     let client = Client::new();
-    let response = client.post("http://pm_auth:8081/api/2fa")
+    let response = client.post("http://pm_auth:8081/2fa")
         .send()
         .await
         .unwrap();

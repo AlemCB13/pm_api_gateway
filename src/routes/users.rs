@@ -5,7 +5,7 @@ use serde_json::Value;
 // Obtener un usuario por ID
 pub async fn get_user(user_id: web::Path<i32>) -> HttpResponse {
     let client = Client::new();
-    let response = client.get(format!("http://pm_user_management:8082/api/users/{}", user_id))
+    let response = client.get(format!("http://pm_user_management:8082/users/{}", user_id))
         .send()
         .await
         .unwrap();
@@ -17,7 +17,7 @@ pub async fn get_user(user_id: web::Path<i32>) -> HttpResponse {
 // Crear un usuario
 pub async fn create_user() -> HttpResponse {
     let client = Client::new();
-    let response = client.post("http://pm_user_management:8082/api/users")
+    let response = client.post("http://pm_user_management:8082/users")
         .send()
         .await
         .unwrap();
@@ -29,7 +29,7 @@ pub async fn create_user() -> HttpResponse {
 // Actualizar un usuario
 pub async fn update_user(user_id: web::Path<i32>) -> HttpResponse {
     let client = Client::new();
-    let response = client.put(format!("http://pm_user_management:8082/api/users/{}", user_id))
+    let response = client.put(format!("http://pm_user_management:8082/users/{}", user_id))
         .send()
         .await
         .unwrap();
@@ -41,7 +41,7 @@ pub async fn update_user(user_id: web::Path<i32>) -> HttpResponse {
 // Eliminar un usuario
 pub async fn delete_user(user_id: web::Path<i32>) -> HttpResponse {
     let client = Client::new();
-    let response = client.delete(format!("http://pm_user_management:8082/api/users/{}", user_id))
+    let response = client.delete(format!("http://pm_user_management:8082/users/{}", user_id))
         .send()
         .await
         .unwrap();

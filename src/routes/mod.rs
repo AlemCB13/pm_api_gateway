@@ -6,7 +6,7 @@ pub mod projects;
 
 pub fn config(cfg: &mut web::ServiceConfig) {
     cfg.service(
-        web::scope("/api")
+        web::scope("")
             .configure(auth::config)
             .configure(users::config)
             .configure(projects::config),
