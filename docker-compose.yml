@@ -1,71 +1,45 @@
 version: "3.8"
 
 services:
-
-  pm_auth:
-    build:
-      context: ../pm_auth
-      dockerfile: Dockerfile
-    ports:
-      - "8081:8080"
-    depends_on:
-      pm_auth_redis:
-        condition: service_healthy
-    networks:
-      - app-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8081/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-
   pm_api_gateway:
     build: .
     ports:
       - "8080:8080"
     depends_on:
-      pm_auth:
-        condition: service_healthy
-      pm_user_management:
-        condition: service_healthy  
-      pm_project_management:
-        condition: service_healthy
-    environment:
-      - AUTH_URL=http://pm_auth:8080
+      - pm_auth
+      - pm_user_management
+      - pm_project_management
     networks:
       - app-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
+
+  pm_auth:
+    build: ../pm_auth
+    ports:
+      - "8081:8080"
+    environment:
+      - REDIS_URL=redis://pm_auth_redis:6379
+    networks:
+      - app-network
 
   pm_auth_redis:
-    image: redis:alpine
+    image: redis
     ports:
       - "6379:6379"
     networks:
       - app-network
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
 
   pm_user_management:
     build: ../pm_user_management
     ports:
       - "8082:8080"
-    depends_on:
-      - userdb
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://userdb:5432/userdb
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://pm_user_management_db:5432/userdb
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=password
     networks:
       - app-network
 
-  userdb:
+  pm_user_management_db:
     image: postgres:13
     environment:
       - POSTGRES_USER=postgres
@@ -79,23 +53,139 @@ services:
   pm_project_management:
     build: ../pm_project_management
     ports:
-      - "8083:8000"
-    depends_on:
-      - pm_project_management_db
+      - "8083:8080"
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=pm_db
+      - POSTGRES_HOST=pm_user_management_db
+      - POSTGRES_PORT=5432
     networks:
       - app-network
 
   pm_project_management_db:
     image: postgres:13
     environment:
-      - POSTGRES_USER=postgres
+      - POSTGRES_USER=user
       - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=pm_project_db
+      - POSTGRES_DB=pm_db
     ports:
       - "5433:5432"
     networks:
       - app-network
 
 networks:
-  app-network:
-    driver: bridge
+   app-network:
+      driver: bridge
+
+
+
+#version: "3.8"
+
+# services:
+
+#   pm_auth:
+#     build:
+#       context: ../pm_auth
+#       dockerfile: Dockerfile
+#     ports:
+#       - "8081:8080"
+#     depends_on:
+#       - pm_auth_redis
+#     networks:
+#       - app-network
+#     # healthcheck:
+#     #   test: ["CMD", "curl", "-f", "http://pm_auth:8080/health"]
+#     #   interval: 30s
+#     #   timeout: 10s
+#     #   retries: 5
+
+#   pm_api_gateway:
+#     build: .
+#     ports:
+#       - "8080:8080"
+#     depends_on:
+#       - pm_auth
+#       #   condition: service_healthy
+#       # pm_user_management:
+#       #   condition: service_healthy  
+#       # pm_project_management:
+#       #   condition: service_healthy
+#     # environment:
+#     #   - AUTH_URL=http://pm_auth:8080
+#     networks:
+#       - app-network
+#     # healthcheck:
+#     #   test: ["CMD", "curl", "-f", "http://pm_api_gateway:8080/health"]
+#     #   interval: 30s
+#     #   timeout: 10s
+#     #   retries: 5
+
+#   pm_auth_redis:
+#     image: redis
+#     ports:
+#       - "6379:6379"
+#     networks:
+#       - app-network
+#     # healthcheck:
+#     #   test: ["CMD", "redis-cli", "ping"]
+#     #   interval: 10s
+#     #   timeout: 5s
+#     #   retries: 3
+
+#   pm_user_management:
+#     build: ../pm_user_management
+#     ports:
+#       - "8082:8080"
+#     depends_on:
+#       userdb:
+#         condition: service_healthy
+#     environment:
+#       - SPRING_DATASOURCE_URL=jdbc:postgresql://userdb:5432/userdb
+#       - SPRING_DATASOURCE_USERNAME=postgres
+#       - SPRING_DATASOURCE_PASSWORD=password
+#     networks:
+#       - app-network
+#     healthcheck:
+#       test: ["CMD", "curl", "-f", "http://pm_user_management:8080/health"]
+#       interval: 30s
+#       timeout: 10s
+#       retries: 5
+
+#   userdb:
+#     image: postgres:13
+#     environment:
+#       - POSTGRES_USER=postgres
+#       - POSTGRES_PASSWORD=password
+#       - POSTGRES_DB=userdb
+#     ports:
+#       - "5432:5432"
+#     networks:
+#       - app-network
+
+#   pm_project_management:
+#     build: 
+#       context: ../pm_project_management
+#     ports:
+#       - "8083:8080"
+#     depends_on:
+#       pm_project_management_db:
+#         condition: service_healthy
+#     networks:
+#       - app-network
+#     healthcheck:
+#       test: ["CMD", "curl", "-f", "http://pm_project_management:8080/health"]
+#       interval: 30s
+#       timeout: 10s
+#       retries: 5
+
+#   pm_project_management_db:
+#     image: postgres:13
+#     environment:
+#       - POSTGRES_USER=postgres
+#       - POSTGRES_PASSWORD=password
+#       - POSTGRES_DB=pm_project_db
+#     ports:
+#       - "5433:5432"
+#     networks:
+#       - app-network

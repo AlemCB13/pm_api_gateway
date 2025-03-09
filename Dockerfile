@@ -1,28 +1,41 @@
-# Etapa 1: Construcción
-FROM rust:latest AS builder
+FROM rust:latest as builder
 WORKDIR /app
-COPY Cargo.toml Cargo.lock ./
-RUN cargo fetch               
-COPY src/ /app/src/                
+COPY . .
 RUN cargo build --release
 
-# Etapa 2: Ejecución
-FROM ubuntu:22.04
-WORKDIR /app
+FROM debian:bookworm-slim
 
-# Instalar dependencias necesarias
-RUN apt-get update && apt-get install -y \
-    libssl-dev \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
-
+RUN apt-get update && apt-get install -y libssl3 curl iputils-ping && apt-get clean && rm -rf /var/lib/apt/lists/*
 COPY --from=builder /app/target/release/pm_api_gateway /usr/local/bin/pm_api_gateway
 
-# Exponer el puerto
-EXPOSE 8080
+CMD ["pm_api_gateway"]
 
-# Comando de inicio
-CMD ["/usr/local/bin/pm_api_gateway"]
+
+# # Etapa 1: Construcción
+# FROM rust:latest AS builder
+# WORKDIR /app
+# COPY Cargo.toml Cargo.lock ./
+# RUN cargo fetch               
+# COPY src/ /app/src/                
+# RUN cargo build --release
+
+# # Etapa 2: Ejecución
+# FROM ubuntu:22.04
+# WORKDIR /app
+
+# # Instalar dependencias necesarias
+# RUN apt-get update && apt-get install -y \
+#     libssl-dev \
+#     ca-certificates \
+#     && rm -rf /var/lib/apt/lists/*
+
+# COPY --from=builder /app/target/release/pm_api_gateway /usr/local/bin/pm_api_gateway
+
+# # Exponer el puerto
+# EXPOSE 8080
+
+# # Comando de inicio
+# CMD ["/usr/local/bin/pm_api_gateway"]
 
 
 

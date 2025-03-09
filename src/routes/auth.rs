@@ -1,20 +1,59 @@
-use actix_web::{web, HttpResponse, Responder};
+use actix_web::{web, HttpResponse};
 use reqwest::Client;
 use serde_json::Value;
 
-pub async fn login() -> impl Responder {
-    // Crear cliente HTTP
+// Login
+pub async fn login() -> HttpResponse {
     let client = Client::new();
-    let response = client
-        .post("http://pm_auth:8080/api/auth/login")
+    let response = client.post("http://pm_auth:8081/api/login")
         .send()
         .await
-        .unwrap(); 
+        .unwrap();
 
-    let data: Value = response.json().await.unwrap(); // Convertir response a JSON
-    HttpResponse::Ok().json(data)
+    let json_response: Value = response.json().await.unwrap();
+    HttpResponse::Ok().json(json_response)
 }
 
+// Registro
+pub async fn register() -> HttpResponse {
+    let client = Client::new();
+    let response = client.post("http://pm_auth:8081/api/register")
+        .send()
+        .await
+        .unwrap();
+
+    let json_response: Value = response.json().await.unwrap();
+    HttpResponse::Ok().json(json_response)
+}
+
+// Logout
+pub async fn logout() -> HttpResponse {
+    let client = Client::new();
+    let response = client.post("http://pm_auth:8081/api/logout")
+        .send()
+        .await
+        .unwrap();
+
+    let json_response: Value = response.json().await.unwrap();
+    HttpResponse::Ok().json(json_response)
+}
+
+// Autenticación de dos factores (2FA)
+pub async fn two_factor_auth() -> HttpResponse {
+    let client = Client::new();
+    let response = client.post("http://pm_auth:8081/api/2fa")
+        .send()
+        .await
+        .unwrap();
+
+    let json_response: Value = response.json().await.unwrap();
+    HttpResponse::Ok().json(json_response)
+}
+
+// Configuración de rutas
 pub fn config(cfg: &mut web::ServiceConfig) {
-    cfg.route("/auth/login", web::post().to(login));
+    cfg.route("/login", web::post().to(login))
+        .route("/register", web::post().to(register))
+        .route("/logout", web::post().to(logout))
+        .route("/2fa", web::post().to(two_factor_auth));
 }
